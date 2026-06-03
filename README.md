@@ -327,385 +327,126 @@ void main() {
 <img width="1920" height="940" alt="8" src="https://github.com/user-attachments/assets/6a137c29-8314-4318-b83a-e1227b8f9f8b" />
 
 
-## Factory untuk Immutable Objects dengan Cache
+## Redirecting Constructor dengan Initializer List
 
-Factory constructor sering digunakan untuk menerapkan caching pada immutable object, yaitu objek yang nilainya tidak dapat diubah setelah dibuat. Dengan teknik ini, ketika objek dengan data yang sama diminta kembali, factory constructor akan mengembalikan instance yang sudah ada di cache daripada membuat objek baru. Pendekatan ini dapat menghemat penggunaan memori, meningkatkan performa aplikasi, dan memastikan tidak terjadi pembuatan objek yang sama secara berulang.
+Dalam Dart, Redirecting Constructor dapat dikombinasikan dengan Initializer List untuk memberikan nilai awal pada atribut sebelum constructor utama dijalankan. Initializer List ditulis setelah tanda titik dua (:) dan sebelum body constructor. Fitur ini sangat berguna terutama ketika class memiliki atribut final yang harus diinisialisasi saat objek dibuat.
+
+Penggunaan Redirecting Constructor dengan Initializer List membantu menjaga kode tetap ringkas karena seluruh proses inisialisasi tetap dipusatkan pada constructor utama, sementara constructor lainnya hanya menyediakan nilai yang diperlukan.
 
 ### Contoh :
 
 ```dart
-class User {
-  final String username;
+class Product {
+  final String name;
+  final double price;
 
-  static final Map<String, User> _cache = {};
+  Product(this.name, this.price);
 
-  User._internal(this.username);
-
-  factory User(String username) {
-    if (_cache.containsKey(username)) {
-      return _cache[username]!;
-    }
-
-    final user = User._internal(username);
-    _cache[username] = user;
-
-    return user;
-  }
+  Product.free(String name)
+      : this(
+          name,
+          0,
+        );
 }
 
 void main() {
-  var user1 = User('azhar');
-  var user2 = User('azhar');
-  var user3 = User('rizki');
+  var product1 = Product('Laptop', 7500000);
+  var product2 = Product.free('Mouse');
 
-  print(identical(user1, user2));
-
-  print(identical(user1, user3));
+  print('${product1.name} - Rp${product1.price}');
+  print('${product2.name} - Rp${product2.price}');
 }
 ```
 
-<img width="1920" height="942" alt="10" src="https://github.com/user-attachments/assets/201d590d-fc90-45b9-aa54-e5dc942af5ac" />
+<img width="1919" height="944" alt="9" src="https://github.com/user-attachments/assets/a19c6ae1-d5b4-46d0-bcce-bda68aa9f575" />
 
 
-# Studi Kasus
+## Best Practices Redirecting Constructor
 
-## Studi Kasus I - Document Factory
+Dalam penggunaan Redirecting Constructor, terdapat beberapa praktik terbaik yang dapat diterapkan agar kode tetap terstruktur, mudah dipahami, dan mudah dipelihara. Meskipun Redirecting Constructor dapat membantu mengurangi duplikasi kode, penggunaannya tetap perlu memperhatikan desain class secara keseluruhan agar tidak menimbulkan kompleksitas yang tidak diperlukan.
 
-```dart
-abstract class Document {
-  void open();
+Beberapa praktik terbaik yang dapat diterapkan antara lain :
 
-  factory Document(String type) {
-    if (type == 'pdf') {
-      return PdfDocument();
-    } else if (type == 'word') {
-      return WordDocument();
-    } else if (type == 'excel') {
-      return ExcelDocument();
-    }
+1. Gunakan Redirecting Constructor untuk mengurangi duplikasi kode, terutama ketika beberapa constructor memiliki proses inisialisasi yang sama.
+2. Pusatkan logika inisialisasi pada satu constructor utama, sehingga perubahan pada proses inisialisasi cukup dilakukan di satu tempat.
+3. Gunakan nama constructor yang deskriptif, seperti guest(), admin(), atau development(), agar tujuan constructor mudah dipahami.
+4. Hindari Multiple Redirecting Levels yang terlalu panjang, karena dapat membuat alur pembuatan objek menjadi sulit ditelusuri.
+5. Manfaatkan Redirecting Constructor untuk menyediakan nilai default, sehingga pembuatan objek menjadi lebih sederhana dan konsisten.
+6. Gunakan Factory Constructor apabila diperlukan logika yang lebih kompleks, seperti caching, singleton, validasi khusus sebelum pembuatan objek, atau pengembalian instance dari class yang berbeda.
 
-    throw Exception('Tipe dokumen tidak didukung');
-  }
-}
-
-class PdfDocument implements Document {
-  @override
-  void open() {
-    print('Membuka dokumen PDF');
-  }
-}
-
-class WordDocument implements Document {
-  @override
-  void open() {
-    print('Membuka dokumen Word');
-  }
-}
-
-class ExcelDocument implements Document {
-  @override
-  void open() {
-    print('Membuka dokumen Excel');
-  }
-}
-
-void main() {
-  Document pdf = Document('pdf');
-  Document word = Document('word');
-  Document excel = Document('excel');
-
-  pdf.open();
-  word.open();
-  excel.open();
-}
-```
-
-<img width="1919" height="941" alt="11" src="https://github.com/user-attachments/assets/e7d0cbf2-3b48-4ac1-9c5d-bc9bbe68fc45" />
+Dengan menerapkan praktik-praktik tersebut, Redirecting Constructor dapat digunakan secara efektif untuk menghasilkan kode yang lebih ringkas, konsisten, dan mudah dipelihara, terutama pada class yang memiliki banyak variasi constructor.
 
 
 # Kesimpulan
 
-Factory Constructor merupakan constructor khusus pada Dart yang memberikan fleksibilitas lebih dalam proses pembuatan objek. Berbeda dengan constructor biasa yang selalu membuat instance baru, factory constructor dapat mengembalikan objek yang sudah ada, mengelola proses caching, maupun menentukan jenis objek yang akan dikembalikan berdasarkan kondisi tertentu. Kemampuan ini membuat factory constructor menjadi salah satu fitur penting dalam pengembangan aplikasi berorientasi objek.
+Redirecting Constructor merupakan fitur dalam bahasa pemrograman Dart yang memungkinkan sebuah constructor mengalihkan proses pembuatan objek ke constructor lain dalam class yang sama. Fitur ini sangat berguna untuk mengurangi duplikasi kode karena seluruh proses inisialisasi dapat dipusatkan pada satu constructor utama, sementara constructor lainnya hanya bertugas meneruskan parameter yang diperlukan.
 
-Melalui materi ini telah dipelajari berbagai konsep terkait Factory Constructors, mulai dari sintaks dasar, penggunaan named factory constructor, generic factory constructor, hingga perbandingan antara factory constructor dan static method. Selain itu, factory constructor juga dapat dimanfaatkan untuk mengimplementasikan immutable objects dengan cache sehingga penggunaan memori menjadi lebih efisien. Berbagai contoh kode yang diberikan menunjukkan bagaimana factory constructor dapat menyederhanakan proses pembuatan objek sekaligus meningkatkan fleksibilitas desain program.
+Pada sesi ini telah dipelajari berbagai konsep terkait Redirecting Constructor, mulai dari sintaks dasar, permasalahan yang muncul tanpa Redirecting Constructor, solusi menggunakan Redirecting Constructor, penggunaan named parameters, validasi data, multiple redirecting levels, perbandingan dengan Factory Constructor, hingga penggunaan bersama initializer list. Selain itu, materi juga dilengkapi dengan praktik pembuatan Configuration Class dan API Response untuk memberikan pemahaman yang lebih mendalam mengenai penerapan Redirecting Constructor dalam kasus nyata.
 
-Penerapan Factory Constructors sangat banyak ditemukan dalam pengembangan perangkat lunak modern, seperti pada implementasi Singleton Pattern, Object Pool, Caching, pemilihan subclass secara otomatis, dan pembuatan dokumen berdasarkan tipe tertentu. Dengan memahami konsep dan penggunaan factory constructor secara tepat, programmer dapat menghasilkan kode yang lebih efisien, mudah dipelihara, serta sesuai dengan prinsip-prinsip pemrograman berorientasi objek.
+Dengan memahami dan menerapkan Redirecting Constructor secara tepat, pengembang dapat menghasilkan kode yang lebih ringkas, konsisten, mudah dipelihara, dan lebih terorganisir. Oleh karena itu, Redirecting Constructor menjadi salah satu fitur penting dalam pemrograman berorientasi objek di Dart, terutama ketika sebuah class memiliki banyak variasi constructor dengan proses inisialisasi yang serupa.
 
 ---
 
 
 # Latihan
 
-## Latihan 1
 
 ```dart
-class DatabaseConnection {
-  final String host;
-  final int port;
+import 'dart:math';
 
-  DatabaseConnection._(this.host, this.port);
-
-  static final Map<String, DatabaseConnection> _pool = {};
-
-  factory DatabaseConnection(String host, int port) {
-    String key = '$host:$port';
-
-    if (_pool.containsKey(key)) {
-      print('Menggunakan koneksi dari pool');
-      return _pool[key]!;
-    }
-
-    print('Membuat koneksi baru');
-    final connection = DatabaseConnection._(host, port);
-
-    _pool[key] = connection;
-
-    return connection;
-  }
-
-  void connect() {
-    print('Terhubung ke $host:$port');
-  }
-}
-
-void main() {
-  var conn1 = DatabaseConnection('localhost', 5432);
-  var conn2 = DatabaseConnection('localhost', 5432);
-
-  conn1.connect();
-
-  print(identical(conn1, conn2));
-}
-```
-
-<img width="1920" height="945" alt="12" src="https://github.com/user-attachments/assets/b8fa9490-24d1-45fd-93c6-1ef5a4889493" />
-
-
-## Latihan 2
-
-```dart
-abstract class Notification {
-  void send(String message);
-
-  factory Notification(String platform) {
-    if (platform.toLowerCase() == 'email') {
-      return EmailNotification();
-    } else if (platform.toLowerCase() == 'sms') {
-      return SmsNotification();
-    } else if (platform.toLowerCase() == 'push') {
-      return PushNotification();
-    }
-
-    throw Exception('Platform tidak didukung');
-  }
-}
-
-class EmailNotification implements Notification {
-  @override
-  void send(String message) {
-    print('Email: $message');
-  }
-}
-
-class SmsNotification implements Notification {
-  @override
-  void send(String message) {
-    print('SMS: $message');
-  }
-}
-
-class PushNotification implements Notification {
-  @override
-  void send(String message) {
-    print('Push Notification: $message');
-  }
-}
-
-void main() {
-  Notification email = Notification('email');
-  Notification sms = Notification('sms');
-  Notification push = Notification('push');
-
-  email.send('Selamat datang!');
-  sms.send('Kode OTP Anda: 123456');
-  push.send('Ada promo baru hari ini!');
-}
-```
-
-<img width="1920" height="943" alt="13" src="https://github.com/user-attachments/assets/77a74017-4be6-4059-ac89-7b73d6952a89" />
-
-
-## Latihan 3
-
-```dart
-abstract class Shape {
-  void draw();
-}
-
-class Circle implements Shape {
+class Circle {
   final double radius;
 
   Circle(this.radius);
 
-  @override
-  void draw() {
-    print('Lingkaran dengan radius $radius');
-  }
-}
+  Circle.fromDiameter(double diameter)
+      : this(diameter / 2);
 
-class Square implements Shape {
-  final double side;
+  Circle.fromCircumference(double circumference)
+      : this(circumference / (2 * pi));
 
-  Square(this.side);
+  Circle.fromArea(double area)
+      : this(sqrt(area / pi));
 
-  @override
-  void draw() {
-    print('Persegi dengan sisi $side');
-  }
-}
+  double get diameter => radius * 2;
 
-class ShapeFactory {
-  static final Map<String, Shape> _cache = {};
+  double get circumference => 2 * pi * radius;
 
-  static Shape getCircle(double radius) {
-    String key = 'circle_$radius';
+  double get area => pi * radius * radius;
 
-    if (!_cache.containsKey(key)) {
-      print('Membuat Circle baru');
-      _cache[key] = Circle(radius);
-    } else {
-      print('Menggunakan Circle dari cache');
-    }
-
-    return _cache[key]!;
-  }
-
-  static Shape getSquare(double side) {
-    String key = 'square_$side';
-
-    if (!_cache.containsKey(key)) {
-      print('Membuat Square baru');
-      _cache[key] = Square(side);
-    } else {
-      print('Menggunakan Square dari cache');
-    }
-
-    return _cache[key]!;
+  void showInfo() {
+    print('Radius       : ${radius.toStringAsFixed(2)}');
+    print('Diameter     : ${diameter.toStringAsFixed(2)}');
+    print('Keliling     : ${circumference.toStringAsFixed(2)}');
+    print('Luas         : ${area.toStringAsFixed(2)}');
   }
 }
 
 void main() {
-  Shape circle1 = ShapeFactory.getCircle(10);
-  Shape circle2 = ShapeFactory.getCircle(10);
+  var c1 = Circle(7);
+  var c2 = Circle.fromDiameter(14);
+  var c3 = Circle.fromCircumference(43.98);
+  var c4 = Circle.fromArea(153.94);
 
-  Shape square1 = ShapeFactory.getSquare(5);
-  Shape square2 = ShapeFactory.getSquare(5);
+  c1.showInfo();
 
-  circle1.draw();
-  square1.draw();
+  print('---');
 
-  print(identical(circle1, circle2));
-  print(identical(square1, square2));
+  c2.showInfo();
+
+  print('---');
+
+  c3.showInfo();
+
+  print('---');
+
+  c4.showInfo();
 }
 ```
 
-<img width="1919" height="946" alt="14" src="https://github.com/user-attachments/assets/708e7d6d-5bf0-4cbf-a6f4-75f8a622f17b" />
+<img width="1919" height="942" alt="10" src="https://github.com/user-attachments/assets/9568bddf-922a-4b3e-b50a-0a8ecf574b0b" />
 
 
----
-
-# Challenge - AnimalFactory
-
-```dart
-abstract class Animal {
-  String name;
-
-  Animal(this.name);
-
-  void makeSound();
-
-  static final Map<String, Animal> _cache = {};
-
-  factory Animal.create(String type, String name) {
-    if (name.trim().isEmpty) {
-      throw Exception('Nama hewan tidak boleh kosong');
-    }
-
-    String key = '${type.toLowerCase()}_$name';
-
-    if (_cache.containsKey(key)) {
-      print('Menggunakan hewan dari cache');
-      return _cache[key]!;
-    }
-
-    Animal animal;
-
-    switch (type.toLowerCase()) {
-      case 'dog':
-        animal = Dog(name);
-        break;
-
-      case 'cat':
-        animal = Cat(name);
-        break;
-
-      case 'bird':
-        animal = Bird(name);
-        break;
-
-      default:
-        throw Exception('Jenis hewan tidak dikenal');
-    }
-
-    _cache[key] = animal;
-
-    print('Membuat hewan baru');
-
-    return animal;
-  }
-}
-
-class Dog extends Animal {
-  Dog(String name) : super(name);
-
-  @override
-  void makeSound() {
-    print('$name : Woof!');
-  }
-}
-
-class Cat extends Animal {
-  Cat(String name) : super(name);
-
-  @override
-  void makeSound() {
-    print('$name : Meow!');
-  }
-}
-
-class Bird extends Animal {
-  Bird(String name) : super(name);
-
-  @override
-  void makeSound() {
-    print('$name : Tweet!');
-  }
-}
-
-void main() {
-  Animal dog1 = Animal.create('dog', 'Buddy');
-  Animal dog2 = Animal.create('dog', 'Buddy');
-
-  Animal cat1 = Animal.create('cat', 'Milo');
-
-  dog1.makeSound();
-  cat1.makeSound();
-
-  print(identical(dog1, dog2));
-}
-```
-
-<img width="1919" height="942" alt="15" src="https://github.com/user-attachments/assets/aac4a391-526d-449d-9748-49cf0f452387" />
 
 
 ---
